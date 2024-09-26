@@ -15,7 +15,7 @@ if platform.system() == 'Linux':
 else:
     os.system("cls")
 
-hook = Webhook("https://discord.com/api/webhooks/1283829399132573798/BQYGDwoOEfz7_PC1eSzmqO8BmkbAZwm0RmRgAXTC7Uisq3E4u2w5CMSaxkiF3Jeh0fBM")
+hook = Webhook("YOUR_DISCORD_WEBHOOK")
 def start_ngrok():
     ngrok_process = subprocess.Popen(['ngrok', 'http', '8080'], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     print("waiting for ngrok to start..")

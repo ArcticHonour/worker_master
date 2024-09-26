@@ -7,7 +7,7 @@ import requests
 import subprocess
 import time
 from dhooks import Webhook
-
+#worker v1
 app = Flask(__name__)
 
 if platform.system() == 'Linux':

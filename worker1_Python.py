@@ -15,7 +15,7 @@ if platform.system() == 'Linux':
 else:
     os.system("cls")
 # Webhook URL for Discord
-hook = Webhook("https://discord.com/api/webhooks/1283829399132573798/BQYGDwoOEfz7_PC1eSzmqO8BmkbAZwm0RmRgAXTC7Uisq3E4u2w5CMSaxkiF3Jeh0fBM")
+hook = Webhook("YOUR_DISCORD_WEBHOOK")
 
 # Function to start ngrok and get the public URL
 def start_ngrok():

